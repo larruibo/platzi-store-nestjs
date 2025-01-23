@@ -9,4 +9,14 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('bye')
+  getBye(): string {
+    return 'Bye World!';
+  }
+
+  @Get('/ruta/')
+  getRuta(): string {
+    return 'con /slash/';
+  }
 }
