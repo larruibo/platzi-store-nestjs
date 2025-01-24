@@ -9,60 +9,54 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  // ParseIntPipe,
 } from '@nestjs/common';
 
 import { ProductsService } from '../services/products.service';
+import { Product } from '../entities/product.entity';
+import { ParseIntPipe } from '../common/parse-int/parse-int.pipe';
+import { CreateProductDto, UpdateProductDto } from '../dtos/products.dtos';
 
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  getProducts(@Query('limit') limit = 20, @Query('offset') offset = 0): object {
+  getProducts(
+    @Query('limit') limit = 20,
+    @Query('offset') offset = 0,
+  ): Product[] {
     const products = this.productsService.getAll();
-    return {
-      message: `Products ${limit} ${offset}`,
-      limit,
-      offset,
-      products,
-    };
+    return products;
   }
 
   @Get(':productId')
-  getProduct(@Param('productId') productId: string): object {
-    const product = this.productsService.getById(Number(productId));
-    return {
-      message: `Product ${productId}`,
-      product,
-    };
+  getProduct(
+    @Param('productId', ParseIntPipe) productId: number,
+  ): Product | null {
+    const product = this.productsService.getById(productId);
+    return product;
   }
 
   @Post()
-  createProduct(@Body() payload: any): object {
-    return {
-      message: 'Product created',
-      payload,
-    };
+  createProduct(@Body() payload: CreateProductDto): Product | null {
+    const product = this.productsService.create(payload);
+    return product;
   }
 
   @Put(':productId')
   updateProduct(
-    @Param('productId') productId: string,
-    @Body() payload: any,
-  ): object {
-    return {
-      message: 'Product updated',
-      productId,
-      payload,
-    };
+    @Param('productId', ParseIntPipe) productId: number,
+    @Body() payload: UpdateProductDto,
+  ): Product | null {
+    const updatedProduct = this.productsService.update(productId, payload);
+    return updatedProduct;
   }
 
   @Delete(':productId')
-  @HttpCode(HttpStatus.REQUEST_TIMEOUT)
-  deleteProduct(@Param('productId') productId: string): object {
-    return {
-      message: 'Product deleted',
-      productId,
-    };
+  @HttpCode(HttpStatus.OK)
+  deleteProduct(@Param('productId', ParseIntPipe) productId: number): boolean {
+    const product = this.productsService.delete(Number(productId));
+    return product;
   }
 }
